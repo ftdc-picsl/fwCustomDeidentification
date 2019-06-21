@@ -15,7 +15,7 @@ tagsAndKeywords = len(keyList) * [None]
 
 for i in range(len(keyList)):
   hexKey = '%08X' % keyList[i]
-  tag = hexKey[0:4] + ',' + hexKey[4:] 
+  tag = '(' + hexKey[0:4] + ',' + hexKey[4:] + ')'
   tagsAndKeywords[i] = [tag, DicomDictionary[keyList[i]][4]]
 
 # Add header
