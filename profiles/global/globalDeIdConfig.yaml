@@ -1,16 +1,9 @@
 #
-# Example de-identification profile
-
-#
 # Start with the empty profile
 profile: none
 
 # Log de-identification actions that were taken (before/after values)
-#
-# Uncomment this to keep a log of changed fields. This file will contain
-# PHI; secure appropriately
-#
-# deid-log: /tmp/deid/log/myprojectDeIdLog.csv
+deid-log: /tmp/deid/global2DeIdLog.csv
 
 # Configuration for dicom de-identification
 dicom:
@@ -27,209 +20,206 @@ dicom:
     # (0018,1000) 
     - name: DeviceSerialNumber
       hashuid: true
-    # (0020,000d) 
-    - name: StudyInstanceUID
-      hashuid: true
 
-    # (0010,0020) 
-    - name: PatientID
-      remove: true
-    # (0010,21d0) 
-    - name: LastMenstrualDate
-      remove: true
-    # (0010,21a0) 
-    - name: SmokingStatus
-      remove: true
     # (0008,0050) 
     - name: AccessionNumber
-      remove: true
-    # (0008,0090) 
-    - name: ReferringPhysicianName
-      remove: true
-    # (0010,2298) 
-    - name: ResponsiblePersonRole
-      remove: true
-    # (0010,2110) 
-    - name: Allergies
-      remove: true
-    # (0008,0096) 
-    - name: ReferringPhysicianIdentificationSequence
-      remove: true
-    # (0008,1040) 
-    - name: InstitutionalDepartmentName
-      remove: true
-    # (0040,0006) 
-    - name: ScheduledPerformingPhysicianName
-      remove: true
-    # (0008,1010) 
-    - name: StationName
-      remove: true
-    # (0010,2180) 
-    - name: Occupation
-      remove: true
-    # (0010,2203) 
-    - name: PatientSexNeutered
-      remove: true
-    # (0010,1060) 
-    - name: PatientMotherBirthName
-      remove: true
-    # (0010,2000) 
-    - name: MedicalAlerts
-      remove: true
-    # (0010,0030) 
-    - name: PatientBirthDate
-      remove: true
-    # (0008,1049) 
-    - name: PhysiciansOfRecordIdentificationSequence
-      remove: true
-    # (0010,2152) 
-    - name: RegionOfResidence
-      remove: true
-    # (0010,0032) 
-    - name: PatientBirthTime
-      remove: true
-    # (0010,0021) 
-    - name: IssuerOfPatientID
-      remove: true
-    # (0010,1001) 
-    - name: OtherPatientNames
-      remove: true
-    # (0010,1000) 
-    - name: OtherPatientIDs
-      remove: true
-    # (0010,1040) 
-    - name: PatientAddress
-      remove: true
-    # (0008,1048) 
-    - name: PhysiciansOfRecord
-      remove: true
-    # (4008,0114) 
-    - name: PhysicianApprovingInterpretation
-      remove: true
-    # (0038,0500) 
-    - name: PatientState
-      remove: true
-    # (0010,1100) 
-    - name: ReferencedPatientPhotoSequence
-      remove: true
-    # (0038,0050) 
-    - name: SpecialNeeds
-      remove: true
-    # (0008,0092) 
-    - name: ReferringPhysicianAddress
-      remove: true
-    # (0010,1002) 
-    - name: OtherPatientIDsSequence
-      remove: true
-    # (0010,2160) 
-    - name: EthnicGroup
-      remove: true
-    # (0010,2154) 
-    - name: PatientTelephoneNumbers
-      remove: true
-    # (0008,1072) 
-    - name: OperatorIdentificationSequence
       remove: true
     # (0008,0080) 
     - name: InstitutionName
       remove: true
-    # (0010,1005) 
-    - name: PatientBirthName
-      remove: true
-    # (0010,1090) 
-    - name: MedicalRecordLocator
-      remove: true
-    # (0010,0033) 
-    - name: PatientBirthDateInAlternativeCalendar
-      remove: true
-    # (0010,2155) 
-    - name: PatientTelecomInformation
-      remove: true
-    # (0008,1070) 
-    - name: OperatorsName
-      remove: true
-    # (0010,21f0) 
-    - name: PatientReligiousPreference
-      remove: true
-    # (0010,2299) 
-    - name: ResponsibleOrganization
-      remove: true
-    # (0008,1062) 
-    - name: PhysiciansReadingStudyIdentificationSequence
-      remove: true
-    # (0032,1031) 
-    - name: RequestingPhysicianIdentificationSequence
-      remove: true
-    # (0008,1060) 
-    - name: NameOfPhysiciansReadingStudy
-      remove: true
-    # (0010,0010) 
-    - name: PatientName
-      remove: true
-    # (0010,1050) 
-    - name: InsurancePlanIdentification
-      remove: true
-    # (0010,0101) 
-    - name: PatientPrimaryLanguageCodeSequence
-      remove: true
-    # (0008,009D) 
-    - name: ConsultingPhysicianIdentificationSequence
-      remove: true
-    # (0010,21b0) 
-    - name: AdditionalPatientHistory
-      remove: true
     # (0008,0081) 
     - name: InstitutionAddress
       remove: true
-    # (0008,1050) 
-    - name: PerformingPhysicianName
+    # (0008,0090) 
+    - name: ReferringPhysicianName
+      remove: true
+    # (0008,0092) 
+    - name: ReferringPhysicianAddress
       remove: true
     # (0008,0094) 
     - name: ReferringPhysicianTelephoneNumbers
       remove: true
-    # (0032,1032) 
-    - name: RequestingPhysician
-      remove: true
-    # (0038,0100) 
-    - name: PertinentDocumentsSequence
-      remove: true
-    # (0010,2150) 
-    - name: CountryOfResidence
-      remove: true
-    # (0010,1081) 
-    - name: BranchOfService
-      remove: true
-    # (0040,000B) 
-    - name: ScheduledPerformingPhysicianIdentificationSequence
-      remove: true
-    # (0010,21c0) 
-    - name: PregnancyStatus
-      remove: true
-    # (0040,1400) 
-    - name: RequestedProcedureComments
+    # (0008,0096) 
+    - name: ReferringPhysicianIdentificationSequence
       remove: true
     # (0008,009C) 
     - name: ConsultingPhysicianName
       remove: true
-    # (0010,2297) 
-    - name: ResponsiblePerson
+    # (0008,009D) 
+    - name: ConsultingPhysicianIdentificationSequence
       remove: true
-    # (0010,0050) 
-    - name: PatientInsurancePlanCodeSequence
+    # (0008,1010) 
+    - name: StationName
       remove: true
-    # (0010,0034) 
-    - name: PatientDeathDateInAlternativeCalendar
+    # (0008,1040) 
+    - name: InstitutionalDepartmentName
       remove: true
-    # (0010,1080) 
-    - name: MilitaryRank
+    # (0008,1048) 
+    - name: PhysiciansOfRecord
+      remove: true
+    # (0008,1049) 
+    - name: PhysiciansOfRecordIdentificationSequence
+      remove: true
+    # (0008,1050) 
+    - name: PerformingPhysicianName
       remove: true
     # (0008,1052) 
     - name: PerformingPhysicianIdentificationSequence
       remove: true
+    # (0008,1060) 
+    - name: NameOfPhysiciansReadingStudy
+      remove: true
+    # (0008,1062) 
+    - name: PhysiciansReadingStudyIdentificationSequence
+      remove: true
+    # (0008,1070) 
+    - name: OperatorsName
+      remove: true
+    # (0008,1072) 
+    - name: OperatorIdentificationSequence
+      remove: true
+    # (0010,0010) 
+    - name: PatientName
+      remove: true
+    # (0010,0020) 
+    - name: PatientID
+      remove: true
+    # (0010,0021) 
+    - name: IssuerOfPatientID
+      remove: true
+    # (0010,0030) 
+    - name: PatientBirthDate
+      remove: true
+    # (0010,0032) 
+    - name: PatientBirthTime
+      remove: true
+    # (0010,0033) 
+    - name: PatientBirthDateInAlternativeCalendar
+      remove: true
+    # (0010,0034) 
+    - name: PatientDeathDateInAlternativeCalendar
+      remove: true
+    # (0010,0050) 
+    - name: PatientInsurancePlanCodeSequence
+      remove: true
+    # (0010,0101) 
+    - name: PatientPrimaryLanguageCodeSequence
+      remove: true
+    # (0010,1000) 
+    - name: OtherPatientIDs
+      remove: true
+    # (0010,1001) 
+    - name: OtherPatientNames
+      remove: true
+    # (0010,1002) 
+    - name: OtherPatientIDsSequence
+      remove: true
+    # (0010,1005) 
+    - name: PatientBirthName
+      remove: true
+    # (0010,1040) 
+    - name: PatientAddress
+      remove: true
+    # (0010,1050) 
+    - name: InsurancePlanIdentification
+      remove: true
+    # (0010,1060) 
+    - name: PatientMotherBirthName
+      remove: true
+    # (0010,1080) 
+    - name: MilitaryRank
+      remove: true
+    # (0010,1081) 
+    - name: BranchOfService
+      remove: true
+    # (0010,1090) 
+    - name: MedicalRecordLocator
+      remove: true
+    # (0010,1100) 
+    - name: ReferencedPatientPhotoSequence
+      remove: true
+    # (0010,2000) 
+    - name: MedicalAlerts
+      remove: true
+    # (0010,2110) 
+    - name: Allergies
+      remove: true
+    # (0010,2150) 
+    - name: CountryOfResidence
+      remove: true
+    # (0010,2152) 
+    - name: RegionOfResidence
+      remove: true
+    # (0010,2154) 
+    - name: PatientTelephoneNumbers
+      remove: true
+    # (0010,2155) 
+    - name: PatientTelecomInformation
+      remove: true
+    # (0010,2160) 
+    - name: EthnicGroup
+      remove: true
+    # (0010,2180) 
+    - name: Occupation
+      remove: true
+    # (0010,21a0) 
+    - name: SmokingStatus
+      remove: true
+    # (0010,21b0) 
+    - name: AdditionalPatientHistory
+      remove: true
+    # (0010,21c0) 
+    - name: PregnancyStatus
+      remove: true
+    # (0010,21d0) 
+    - name: LastMenstrualDate
+      remove: true
+    # (0010,21f0) 
+    - name: PatientReligiousPreference
+      remove: true
+    # (0010,2203) 
+    - name: PatientSexNeutered
+      remove: true
+    # (0010,2297) 
+    - name: ResponsiblePerson
+      remove: true
+    # (0010,2298) 
+    - name: ResponsiblePersonRole
+      remove: true
+    # (0010,2299) 
+    - name: ResponsibleOrganization
+      remove: true
+    # (0032,1031) 
+    - name: RequestingPhysicianIdentificationSequence
+      remove: true
+    # (0032,1032) 
+    - name: RequestingPhysician
+      remove: true
+    # (0038,0050) 
+    - name: SpecialNeeds
+      remove: true
+    # (0038,0100) 
+    - name: PertinentDocumentsSequence
+      remove: true
+    # (0038,0500) 
+    - name: PatientState
+      remove: true
+    # (0040,0006) 
+    - name: ScheduledPerformingPhysicianName
+      remove: true
+    # (0040,000B) 
+    - name: ScheduledPerformingPhysicianIdentificationSequence
+      remove: true
+    # (0040,1400) 
+    - name: RequestedProcedureComments
+      remove: true
+    # (4008,0114) 
+    - name: PhysicianApprovingInterpretation
+      remove: true
 
-    # (0012,0063) 
-    - name: DeidentificationMethod
-      replace-with: FTDC global de-id
     # (0008,1030) 
     - name: StudyDescription
       replace-with: FTDC
+    # (0012,0063) 
+    - name: DeidentificationMethod
+      replace-with: FTDC global de-id

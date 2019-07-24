@@ -152,7 +152,7 @@ if (-f $hashUIDCSV) {
     # tag => keyword
     my %hashUIDs = %$hashRef;
 
-    foreach my $tag (keys(%hashUIDs)) {
+    foreach my $tag ( sort(keys(%hashUIDs)) ) {
         my $keyword = $hashUIDs{$tag};
 
         # Add a comment
@@ -170,7 +170,7 @@ if (-f $removeCSV) {
     # tag => keyword
     my %removeTags = %$hashRef;
 
-    foreach my $tag (keys(%removeTags)) {
+    foreach my $tag ( sort(keys(%removeTags)) ) {
         my $keyword = $removeTags{$tag};
 
         # Add a comment
@@ -189,7 +189,7 @@ if (-f $replaceCSV) {
     # tag => (keyword, replacement)
     my %replaceTags = %$hashRef;
     
-    foreach my $tag (keys(%replaceTags)) {
+    foreach my $tag ( sort(keys(%replaceTags)) ) {
         my ($keyword, $replacementText) = @{$replaceTags{$tag}};
 
         # Add a comment
