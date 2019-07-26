@@ -3,7 +3,10 @@
 profile: none
 
 # Log de-identification actions that were taken (before/after values)
-deid-log: /tmp/deid/global2DeIdLog.csv
+# Uncomment this to enable logging. This will contain PHI from the 
+# original DICOM, so secure the log file appropriately
+#
+# deid-log: /tmp/deid/global2DeIdLog.csv
 
 # Configuration for dicom de-identification
 dicom:
