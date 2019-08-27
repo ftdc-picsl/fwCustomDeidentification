@@ -20,13 +20,12 @@ my $usage = qq{
     --output-project-name
     [options]
 
-    Takes as input CSV files containing DICOM fields to be removed, replaced, or hashed. 
+    Takes as input CSV files containing DICOM attributes or fields to be removed, replaced, or hashed. 
     Only UIDs can be hashed.
     
     See the options below for details of the required CSV format.
 
-    Flywheel uses DICOM keywords, rather than numeric tags. But we include the numeric tags
-    for reference.
+    Flywheel uses DICOM keywords, rather than tags. But we include the tags for reference.
 
 
   Required args:
@@ -35,13 +34,6 @@ my $usage = qq{
      Directory to place output config files. The main output is config.yaml, which is passed to fw
      to do the de-identification. 
 
-   --output-log-dir
-     A directory in which to place the de-identification log. If this directory does not exist, it is created 
-     with permissions only for the user who is running this script. 
- 
-     The log file is written by the fw tool and will show the state of each field before and after processing.
- 
-     The log file will contain PHI. CONTAIN PHI. *** CONTAIN PHI ***. 
 
    --output-project-name
      Used to name output files within the respective directories
@@ -49,35 +41,73 @@ my $usage = qq{
 
   Options:
 
-   --hash-uid-list
-     UID fields to be hashed, in a CSV file. This uses a special hashing function that preserves 
-     the prefix and suffix of the UID. The CSV file should be in the format
+   --empty-list
+     List of fields to empty, in a CSV file. The CSV file should be in the format
 
        Tag,Keyword
        (0000,0000),TagKeyword
-    
+
+     Fields on this list will be set to an empty string, but the attribute will remain in the header.
+
+
+   --hash-list
+     Fields to be hashed, in a CSV file. This uses a special hashing function that preserves 
+     the prefix and suffix of the UID. Beware that this may retain the information you're trying to 
+     hide, eg Siemens puts the scan date into the suffix of UIDs. The CSV file should be in the format
+
+       Tag,Keyword
+       (0000,0000),TagKeyword
+
+
    --remove-list
-     List of tags to remove, in a CSV file. The CSV file should be in the format
+     List of attributes to remove, in a CSV file. The CSV file should be in the format
 
        Tag,Keyword
        (0000,0000),TagKeyword
+
+     Attributes on this list are removed entirely. 
+
 
    --replace-list
      List of tags to replace with a constant string, in a CSV file. The CSV file should be in the format
 
        Tag,Keyword,Replacement
        (0000,0000),TagKeyword,"This field replaced by my string"
-    
+
+     Be careful with data types when replacing fields. The replacement is done by the fw tool and it is unknown 
+     how it will handle invalid replacements, eg if you try to replace a numeric field with non-numeric characters. 
+   
+ 
+   --output-log-dir
+     A directory in which to place the de-identification log. If this directory does not exist, it is created 
+     with permissions only for the user who is running this script. 
+
+     Logging is disabled by default because the log file will contain identifiers. Ue this option to keep a record 
+     of what was taken out of the DICOM headers.
+ 
+     The log file is written by the fw tool and will show the state of each field before and after processing.
+ 
+     The log file will contain PHI. CONTAIN PHI. *** CONTAIN PHI ***. 
+
  
   Output:
 
-    Config files and a directory to place the de-identification log. Unless the data is already 
-    de-identified, the log will CONTAIN PHI.
+    Config files for use with fw. If a log directory is specified, the config file will include logging instructions.
+    Unless the data is already de-identified, the log will CONTAIN PHI.
+
+
+  Limitations:
+
+    Tags to be emptied are created if they do not exist.
+
+    No support for modifying private tags, but this may be added in the future.
 
 
   Dependencies:
 
    Requires the Perl Text::CSV module.
+
+
 
 };
 
@@ -87,14 +117,19 @@ if ($#ARGV < 0) {
     exit 1;
 }
 
+my $emptyCSV = "";
 my $hashUIDCSV = "";
 my $removeCSV = "";
 my $replaceCSV = "";
 
-my ($outputConfigDir, $outputLogDir, $outputProjectName);
+# The log is disabled by default
+my $outputLogDir = "";
+
+my ($outputConfigDir, $outputProjectName);
 
 
-GetOptions ("hash-uid-list=s" => \$hashUIDCSV,
+GetOptions ("empty-list=s" => \$emptyCSV,
+            "hash-uid-list=s" => \$hashUIDCSV,
 	    "remove-list=s" => \$removeCSV,
             "replace-list=s" => \$replaceCSV,  
 	    "output-config-dir=s" => \$outputConfigDir,
@@ -106,12 +141,28 @@ GetOptions ("hash-uid-list=s" => \$hashUIDCSV,
 
 # Hard code some defaults
 
+my $deIDLogString = "# deid-log: /my/example/logContainingPHI.csv";
+
+if ($outputLogDir) {
+    $deIDLogString = "deid-log: ${outputLogDir}/${outputProjectName}DeIdLog.csv";
+
+    if (! -d $outputLogDir ) {
+        mkpath($outputLogDir, { verbose => 0, mode => 0700 }) or die("Cannot create output directory $outputLogDir");
+    }
+
+if (! -d $outputConfigDir ) {
+    mkpath($outputConfigDir, { verbose => 0 }) or die("Cannot create output directory $outputConfigDir");
+    }
+}
+
+
 my $configPreamble = qq{#
 # Start with the empty profile
 profile: none
 
 # Log de-identification actions that were taken (before/after values)
-deid-log: ${outputLogDir}/${outputProjectName}DeIdLog.csv
+# This file will contain PHI, secure appropriately
+${deIDLogString}
 
 # Configuration for dicom de-identification
 dicom:
@@ -127,14 +178,6 @@ dicom:
 
 };
 
-# Make output directories
-if (! -d $outputLogDir ) {
-    mkpath($outputLogDir, { verbose => 0, mode => 0700 }) or die("Cannot create output directory $outputLogDir");
-}
-
-if (! -d $outputConfigDir ) {
-    mkpath($outputConfigDir, { verbose => 0 }) or die("Cannot create output directory $outputConfigDir");
-}
 
 my $configFile = "${outputConfigDir}/${outputProjectName}DeIdConfig.yaml";
 
@@ -147,8 +190,8 @@ my $indentNumber = 4;
 my $indentWS = join("", " " x $indentNumber);
 
 if (-f $hashUIDCSV) {
-    my $hashRef = getHashUIDTags($hashUIDCSV);
-        
+    my $hashRef = getTagsAndKeyords($hashUIDCSV);
+    
     # tag => keyword
     my %hashUIDs = %$hashRef;
 
@@ -164,8 +207,27 @@ if (-f $hashUIDCSV) {
 
 print $configFH "\n";
 
+if (-f $replaceCSV) {
+
+    my $hashRef = getTagsKeywordsReplacements($replaceCSV);
+    
+    # tag => (keyword, replacement)
+    my %replaceTags = %$hashRef;
+    
+    foreach my $tag ( sort(keys(%replaceTags)) ) {
+        my ($keyword, $replacementText) = @{$replaceTags{$tag}};
+
+        # Add a comment
+        print $configFH $indentWS . "# $tag \n";
+        print $configFH $indentWS . "- name: ${keyword}\n";
+        print $configFH $indentWS . "  replace-with: ${replacementText}\n";
+    }
+}
+
+print $configFH "\n";
+
 if (-f $removeCSV) {
-    my $hashRef = getRemoveTags($removeCSV);
+    my $hashRef = getTagsAndKeyords($removeCSV);
         
     # tag => keyword
     my %removeTags = %$hashRef;
@@ -182,28 +244,27 @@ if (-f $removeCSV) {
 
 print $configFH "\n";
 
-if (-f $replaceCSV) {
-
-    my $hashRef = getReplaceTags($replaceCSV);
-
-    # tag => (keyword, replacement)
-    my %replaceTags = %$hashRef;
+if (-f $emptyCSV) {
     
-    foreach my $tag ( sort(keys(%replaceTags)) ) {
-        my ($keyword, $replacementText) = @{$replaceTags{$tag}};
-
+    my $hashRef = getTagsAndKeyords($emptyCSV);
+    
+    # tag => (keyword, replacement)
+    my %emptyTags = %$hashRef;
+    
+    foreach my $tag ( sort(keys(%emptyTags)) ) {
+        my $keyword = $emptyTags{$tag};
+        
         # Add a comment
         print $configFH $indentWS . "# $tag \n";
         print $configFH $indentWS . "- name: ${keyword}\n";
-        print $configFH $indentWS . "  replace-with: ${replacementText}\n";
+        print $configFH $indentWS . "  replace-with: ''\n";
     }
 }
 
 close($configFH);
 
 
-
-sub getHashUIDTags {
+sub getTagsAndKeyords {
 
     my $hashUIDFile = $_[0];
 
@@ -244,49 +305,7 @@ sub getHashUIDTags {
     return \%uidsToHash;
 }
 
-sub getRemoveTags {
-
-    my $removeFile = $_[0];
-
-    my $csv = Text::CSV->new({ sep_char => ',' });
-
-    open(my $fh, "<", $removeFile) or die("Could not open '$removeFile' $!\n");
-
-    my %tagsToRemove;
-
-    my $header = <$fh>;
-
-    chomp($header);
-
-    if (! $header eq "Tag,Keyword") {
-        die("Required column names \"Tag,Keyword\" in $removeFile\n");
-    }
-
-    
-    while (my $line = <$fh>) {
-        chomp $line;
- 
-        if ($csv->parse($line)) {
- 
-            my @fields = $csv->fields();
-
-            if (scalar(@fields) != 2) {
-                die("Wrong format in file $removeFile\n");
-            }
-
-            $tagsToRemove{$fields[0]} = $fields[1];
-            
-        } else {
-            die("Line could not be parsed: $line\n");
-        }
-    }
-
-    close($fh);
-
-    return \%tagsToRemove;
-}
-
-sub getReplaceTags {
+sub getTagsKeywordsReplacements {
 
     my $replaceFile = $_[0];
 
