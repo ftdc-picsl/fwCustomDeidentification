@@ -10,7 +10,7 @@ fw import dicom /path/to/dicomDir pennftdcenter aProject \
   --subject subjectID \
   --session sessionID \
   --output-folder /path/to/testOutput \
-  --profile profiles/global/globalDeIdConfig.yaml
+  --profile globalDeIdConfig.yaml
 ```
 
 This does a dry run, outputing data to a local file system. Without the `--output-folder` option, the data will be imported to Flywheel. See the [Flywheel documentation](https://docs.flywheel.io/hc/en-us/articles/360008548134-CLI-Command-import-dicom-) for more information.

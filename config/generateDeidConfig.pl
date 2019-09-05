@@ -15,9 +15,8 @@ use Text::CSV;
 my $usage = qq{
 
   $0 
-    --output-config-dir
-    --output-log-dir
-    --output-project-name
+    --output-config-file
+    --output-log-file
     [options]
 
     Takes as input CSV files containing DICOM attributes or fields to be removed, replaced, or hashed. 
@@ -30,13 +29,8 @@ my $usage = qq{
 
   Required args:
     
-   --output-config-dir
-     Directory to place output config files. The main output is config.yaml, which is passed to fw
-     to do the de-identification. 
-
-
-   --output-project-name
-     Used to name output files within the respective directories
+   --output-config-file
+     Output config file, should have extension ".yaml".
 
 
   Options:
@@ -78,11 +72,12 @@ my $usage = qq{
      how it will handle invalid replacements, eg if you try to replace a numeric field with non-numeric characters. 
    
  
-   --output-log-dir
-     A directory in which to place the de-identification log. If this directory does not exist, it is created 
-     with permissions only for the user who is running this script. 
+   --output-log-file
+     File to place log information, including the value of fields before and after processing.
 
-     Logging is disabled by default because the log file will contain identifiers. Ue this option to keep a record 
+     This file should be specified with an absolute path and have the extension ".csv".
+
+     Logging is disabled by default because the log file will contain identifiers. Use this option to keep a record 
      of what was taken out of the DICOM headers.
  
      The log file is written by the fw tool and will show the state of each field before and after processing.
@@ -123,18 +118,17 @@ my $removeCSV = "";
 my $replaceCSV = "";
 
 # The log is disabled by default
-my $outputLogDir = "";
+my $outputLogFile;
 
-my ($outputConfigDir, $outputProjectName);
+my $outputConfigFile;
 
 
 GetOptions ("empty-list=s" => \$emptyCSV,
             "hash-uid-list=s" => \$hashUIDCSV,
 	    "remove-list=s" => \$removeCSV,
             "replace-list=s" => \$replaceCSV,  
-	    "output-config-dir=s" => \$outputConfigDir,
-            "output-log-dir=s" => \$outputLogDir,
-            "output-project-name=s" => \$outputProjectName
+	    "output-config-file=s" => \$outputConfigFile,
+            "output-log-file=s" => \$outputLogFile
     )
     or die("Error in command line arguments\n");
 
@@ -143,22 +137,49 @@ GetOptions ("empty-list=s" => \$emptyCSV,
 
 my $deIDLogString = "# deid-log: /my/example/logContainingPHI.csv";
 
-if ($outputLogDir) {
-    $deIDLogString = "deid-log: ${outputLogDir}/${outputProjectName}DeIdLog.csv";
+if ($outputLogFile) {
 
-    if (! -d $outputLogDir ) {
-        mkpath($outputLogDir, { verbose => 0, mode => 0700 }) or die("Cannot create output directory $outputLogDir");
+    my ($logBaseName, $logDir, $logSuffix) = fileparse($outputLogFile, ".csv");
+
+    if (!($logSuffix && $logSuffix eq ".csv")) {
+        $logSuffix = ".csv";
     }
 
-if (! -d $outputConfigDir ) {
-    mkpath($outputConfigDir, { verbose => 0 }) or die("Cannot create output directory $outputConfigDir");
+    my $fullPathToLogFile = "${logDir}${logBaseName}${logSuffix}";
+
+    $deIDLogString = "deid-log: ${fullPathToLogFile}";
+
+        
+    if (! -d $logDir ) {
+        mkpath($logDir, { verbose => 0, mode => 0700 }) or die("Cannot create output directory $logDir");
     }
+
 }
 
+my ($configBaseName, $configDir, $configSuffix) = fileparse($outputConfigFile, ".yaml");
+
+if (!($configSuffix && $configSuffix eq ".yaml")) {
+    $configSuffix = ".yaml";
+}
+
+if (! -d $configDir ) {
+    mkpath($configDir, { verbose => 0 }) or die("Cannot create output directory $configDir");
+}
+
+my $fullPathToConfigFile = "${configDir}${configBaseName}${configSuffix}";
+
+open(my $configFH, ">", "$fullPathToConfigFile");
 
 my $configPreamble = qq{#
 # Start with the empty profile
 profile: none
+
+# Example usage with CLI:
+#   fw import dicom /path/to/dicomDir aGroup aProject \\
+#    --subject subjectID \\
+#    --session sessionID \\
+#    --output-folder /path/to/testOutput \\
+#    --profile PennBrainCenter_FlywheelDeIdConfig.yaml
 
 # Log de-identification actions that were taken (before/after values)
 # This file will contain PHI, secure appropriately
@@ -177,11 +198,6 @@ dicom:
   fields:
 
 };
-
-
-my $configFile = "${outputConfigDir}/${outputProjectName}DeIdConfig.yaml";
-
-open(my $configFH, ">", "$configFile");
 
 print $configFH $configPreamble;
 

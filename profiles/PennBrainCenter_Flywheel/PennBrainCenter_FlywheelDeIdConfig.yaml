@@ -2,6 +2,13 @@
 # Start with the empty profile
 profile: none
 
+# Example usage with CLI:
+#   fw import dicom /path/to/dicomDir aGroup aProject \
+#    --subject subjectID \
+#    --session sessionID \
+#    --output-folder /path/to/testOutput \
+#    --profile PennBrainCenter_FlywheelDeIdConfig.yaml
+
 # Log de-identification actions that were taken (before/after values)
 # This file will contain PHI, secure appropriately
 # deid-log: /my/example/logContainingPHI.csv
