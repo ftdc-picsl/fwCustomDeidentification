@@ -23,16 +23,10 @@ for more information.
 ## Included profiles
 
 Most users should use the official profile at
-`profiles/PennBrainCenter_Official/de-id_upenn_Penn_BSC_profile_v1.0_20190906A.yaml`. This
+`profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v1.0_20190906A.yaml`. This
 is the same profile used for data reaped from HUP6. See the README
 there for some examples on how to test the output for successful
 de-identification.
-
-Under `profiles/PennBrainCenter_Annotated/` there is an alternative
-profile that was generated using the script
-`config/generateDeidConfig.pl`. It is designed to be equivalent but
-the official profile should be used unless there is a need to
-customize it.
 
 
 ## Custom de-identification profiles
