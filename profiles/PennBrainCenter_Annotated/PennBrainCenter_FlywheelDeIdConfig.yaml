@@ -16,20 +16,21 @@ profile: none
 # Configuration for dicom de-identification
 dicom:
 
-  # Set patient age from date of birth
-  patient-age-from-birthdate: true
-
-  # Set patient age units as Years
-  patient-age-units: Y
+#
+# Example config options here taken from Flywheel documentation page
+#
+#  # Set patient age from date of birth
+#  patient-age-from-birthdate: true
+#
+#  # Set patient age units as Years
+#  patient-age-units: Y
 
   # Entries under here are generated from a script
   fields:
 
-
     # (0012,0063) 
     - name: DeidentificationMethod
-      replace-with: Penn BSC profile v1.0
-
+      replace-with: Penn_BSC_profile_v1.0
 
     # (0008,0050) 
     - name: AccessionNumber
@@ -238,3 +239,4 @@ dicom:
     # (4008,0114) 
     - name: PhysicianApprovingInterpretation
       replace-with: ''
+

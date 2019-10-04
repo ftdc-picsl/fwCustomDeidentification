@@ -19,8 +19,7 @@ my $usage = qq{
     --output-log-file
     [options]
 
-    Takes as input CSV files containing DICOM attributes or fields to be removed, replaced, or hashed. 
-    Only UIDs can be hashed.
+    Takes as input CSV files containing DICOM attributes or fields to be emptied, removed, or replaced.
     
     See the options below for details of the required CSV format.
 
@@ -42,15 +41,6 @@ my $usage = qq{
        (0000,0000),TagKeyword
 
      Fields on this list will be set to an empty string, but the attribute will remain in the header.
-
-
-   --hash-list
-     Fields to be hashed, in a CSV file. This uses a special hashing function that preserves 
-     the prefix and suffix of the UID. Beware that this may retain the information you're trying to 
-     hide, eg Siemens puts the scan date into the suffix of UIDs. The CSV file should be in the format
-
-       Tag,Keyword
-       (0000,0000),TagKeyword
 
 
    --remove-list
@@ -113,7 +103,6 @@ if ($#ARGV < 0) {
 }
 
 my $emptyCSV = "";
-my $hashUIDCSV = "";
 my $removeCSV = "";
 my $replaceCSV = "";
 
@@ -124,7 +113,6 @@ my $outputConfigFile;
 
 
 GetOptions ("empty-list=s" => \$emptyCSV,
-            "hash-uid-list=s" => \$hashUIDCSV,
 	    "remove-list=s" => \$removeCSV,
             "replace-list=s" => \$replaceCSV,  
 	    "output-config-file=s" => \$outputConfigFile,
@@ -132,6 +120,12 @@ GetOptions ("empty-list=s" => \$emptyCSV,
     )
     or die("Error in command line arguments\n");
 
+# Check we can read all files if they are provided
+foreach my $tagList ($emptyCSV, $removeCSV, $replaceCSV) {
+    if ($tagList && ! -f $tagList) {
+        die("Cannot read list of tags from $tagList");
+    }
+}
 
 # Hard code some defaults
 
@@ -188,11 +182,14 @@ ${deIDLogString}
 # Configuration for dicom de-identification
 dicom:
 
-  # Set patient age from date of birth
-  patient-age-from-birthdate: true
-
-  # Set patient age units as Years
-  patient-age-units: Y
+#
+# Example config options here taken from Flywheel documentation page
+#
+#  # Set patient age from date of birth
+#  patient-age-from-birthdate: true
+#
+#  # Set patient age units as Years
+#  patient-age-units: Y
 
   # Entries under here are generated from a script
   fields:
@@ -205,23 +202,6 @@ my $indentNumber = 4;
 
 my $indentWS = join("", " " x $indentNumber);
 
-if (-f $hashUIDCSV) {
-    my $hashRef = getTagsAndKeyords($hashUIDCSV);
-    
-    # tag => keyword
-    my %hashUIDs = %$hashRef;
-
-    foreach my $tag ( sort(keys(%hashUIDs)) ) {
-        my $keyword = $hashUIDs{$tag};
-
-        # Add a comment
-        print $configFH $indentWS . "# $tag \n";
-        print $configFH $indentWS . "- name: ${keyword}\n";
-        print $configFH $indentWS . "  hashuid: true\n";
-    }
-}
-
-print $configFH "\n";
 
 if (-f $replaceCSV) {
 
@@ -238,12 +218,13 @@ if (-f $replaceCSV) {
         print $configFH $indentWS . "- name: ${keyword}\n";
         print $configFH $indentWS . "  replace-with: ${replacementText}\n";
     }
+
+    print $configFH "\n";
 }
 
-print $configFH "\n";
 
 if (-f $removeCSV) {
-    my $hashRef = getTagsAndKeyords($removeCSV);
+    my $hashRef = getTagsAndKeywords($removeCSV);
         
     # tag => keyword
     my %removeTags = %$hashRef;
@@ -256,13 +237,14 @@ if (-f $removeCSV) {
         print $configFH $indentWS . "- name: ${keyword}\n";
         print $configFH $indentWS . "  remove: true\n";
     }
+
+    print $configFH "\n";
 }
 
-print $configFH "\n";
 
 if (-f $emptyCSV) {
     
-    my $hashRef = getTagsAndKeyords($emptyCSV);
+    my $hashRef = getTagsAndKeywords($emptyCSV);
     
     # tag => (keyword, replacement)
     my %emptyTags = %$hashRef;
@@ -275,27 +257,29 @@ if (-f $emptyCSV) {
         print $configFH $indentWS . "- name: ${keyword}\n";
         print $configFH $indentWS . "  replace-with: ''\n";
     }
+
+    print $configFH "\n";
 }
 
 close($configFH);
 
 
-sub getTagsAndKeyords {
+sub getTagsAndKeywords {
 
-    my $hashUIDFile = $_[0];
+    my $tagFile = $_[0];
 
     my $csv = Text::CSV->new({ sep_char => ',' });
 
-    open(my $fh, "<", $hashUIDFile) or die("Could not open '$hashUIDFile' $!\n");
+    open(my $fh, "<", $tagFile) or die("Could not open '$tagFile' $!\n");
 
-    my %uidsToHash;
+    my %tagsToProcess;
 
     my $header = <$fh>;
 
     chomp($header);
 
     if (! $header eq "Tag,Keyword") {
-        die("Required column names \"Tag,Keyword\" in $hashUIDFile\n");
+        die("Required column names \"Tag,Keyword\" in $tagFile\n");
     }
     
     while (my $line = <$fh>) {
@@ -306,10 +290,10 @@ sub getTagsAndKeyords {
             my @fields = $csv->fields();
 
             if (scalar(@fields) != 2) {
-                die("Wrong format in file $hashUIDFile\n");
+                die("Wrong format in file $tagFile\n");
             }
 
-            $uidsToHash{$fields[0]} = $fields[1];
+            $tagsToProcess{$fields[0]} = $fields[1];
             
         } else {
             die("Line could not be parsed: $line\n");
@@ -318,7 +302,7 @@ sub getTagsAndKeyords {
 
     close($fh);
 
-    return \%uidsToHash;
+    return \%tagsToProcess;
 }
 
 sub getTagsKeywordsReplacements {
