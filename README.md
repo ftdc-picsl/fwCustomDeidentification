@@ -1,6 +1,11 @@
 # fwCustomDeidentification
 Script to import data to Flywheel with custom de-identification profile
 
+*Important note*: The profiles here are designed for uploading data to the UPenn Flywheel
+only. The data should still be kept confidential and accessible only by approved
+personnel.
+
+
 ## Example usage 
 
 If dicom data for a single scan is in `/path/to/dicomDir`, then it can
@@ -37,12 +42,31 @@ de-Identification of dicom field through the CLI](https://docs.flywheel.io/hc/en
 
 ## Generating a profile
 
-First define CSV files containing tags to remove, replace, or hash,
-following the format shown in the `profiles/` directory. A dictionary
-of keywords is included under the `dicom/` directory. There's also an
-example there showing how to access the dictionary in `pydicom`.
+First define CSV files containing tags to remove or replace, following the format shown in
+the `profiles/` directory. A dictionary of keywords is included under the `dicom/`
+directory. There's also an example there showing how to access the dictionary in
+`pydicom`. 
 
 When you have the tags you want to process, run
 `config/generateDeidConfig.pl`.
 
 Always test the profile first before sending data to Flywheel.
+
+
+## Further reading on de-identification
+
+[DICOM standard de-identification
+profiles](http://dicom.nema.org/medical/dicom/current/output/html/part15.html#chapter_E). Description of official de-identification profiles.
+
+[Free DICOM de-identification tools in clinical research: functioning and safety of
+patient privacy](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4636522/). Testing some
+popular DICOM tools, and showing the difficulty in successfully de-identifying DICOM data.
+
+[De-identification of Medical Images with Retention of Scientific Research
+Value](https://pubs.rsna.org/doi/full/10.1148/rg.2015140244). From the Cancer Imaging
+Archive team. "It is extremely difficult to eradicate all PHI from DICOM images with
+automated software while at the same time retaining all useful information." A more
+detailed discussion of their de-identification routines can be found on the [Cancer Imaging
+Archive Wiki](https://wiki.cancerimagingarchive.net/display/Public/Submission+and+De-identification+Overview). 
+
+
