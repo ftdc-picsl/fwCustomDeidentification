@@ -1,10 +1,10 @@
 # fwCustomDeidentification
-Script to import data to Flywheel with custom de-identification profile
 
-*Important note*: The profiles here are designed for uploading data to the UPenn Flywheel
-only. The data should still be kept confidential and accessible only by approved
-personnel.
+Script to generate a custom profile for de-identification of data by the Flywheel CLI.
+The profiles here are designed for uploading data to the UPenn Flywheel only. The data
+should be kept confidential and accessible only by approved personnel. 
 
+The profiles here are **NOT** suitable for any kind of public data sharing.
 
 ## Example usage 
 
