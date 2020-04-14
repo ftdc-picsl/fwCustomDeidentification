@@ -1,7 +1,7 @@
 # Penn Brain Science Center de-identification profile
 #
 # Version information is encoded into de-identified headers
-# in the DeidentificationMethod field.
+# in the DeidentificationMethod field
 #
 # If modifying the profile, update the replacement string 
 # for DeidentificationMethod below
