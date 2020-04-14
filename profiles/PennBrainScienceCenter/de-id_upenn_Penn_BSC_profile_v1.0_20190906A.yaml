@@ -1,3 +1,10 @@
+# Penn Brain Science Center profile v1.0
+#
+# The version is encoded into de-identified data,
+# the DeidentificationMethod field is set to "Penn_BSC_profile_v1.0"
+#
+# If you modify the profile, change both this comment and the
+# replacement string for DeidentificationMethod below
 dicom:
   fields:
   - name: AccessionNumber

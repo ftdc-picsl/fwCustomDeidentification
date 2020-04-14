@@ -1,6 +1,16 @@
 de-id_upenn_Penn_BSC_profile_v1.0_20190906A.yaml is the profile used by the reaper on
 HUP6.
 
+Example use with the CLI:
+
+  fw import dicom \
+    --subject subjectID \
+    --session sessionID \
+    --output-folder /path/to/testOutput \
+    --profile de-id_upenn_Penn_BSC_profile_v1.0_20190906A.yaml \
+    /path/to/dicomDir aGroup aProject
+
+
 You can examine dicom images after a dry run with gdcmscanner.
 
   gdcmscanner -p -r -d  /path/to/flywheel/data -t 0012,0063 | more
