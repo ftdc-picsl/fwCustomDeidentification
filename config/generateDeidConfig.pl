@@ -16,7 +16,6 @@ my $usage = qq{
 
   $0 
     --output-config-file
-    --output-log-file
     [options]
 
     Takes as input CSV files containing DICOM attributes or fields to be emptied, removed, or replaced.
