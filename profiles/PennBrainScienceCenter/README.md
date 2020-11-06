@@ -1,13 +1,23 @@
-de-id_upenn_Penn_BSC_profile_v1.0_20190906A.yaml is the profile used by the reaper on
-HUP6.
+# Penn Brain Science Center de-identification profile
 
-Example use with the CLI:
+## Version history
+
+### 2.0
+
+Allow patient age in years to be stored in Flywheel and in the DICOM files.
+
+### 1.0 
+
+As used by the reaper on HUP6 since November 2019.
+
+
+## Example use with the CLI
 
   fw import dicom \
     --subject subjectID \
     --session sessionID \
     --output-folder /path/to/testOutput \
-    --profile de-id_upenn_Penn_BSC_profile_v1.0_20190906A.yaml \
+    --profile de-id_upenn_Penn_BSC_profile_v2.0_20201106A.yaml \
     /path/to/dicomDir aGroup aProject
 
 
@@ -19,13 +29,13 @@ You should get output like this:
 
 done retrieving file list <NUMBER OF FILES> files found.
 Values:
-Penn_BSC_profile_v1.0 
+Penn_BSC_profile_v2.0 
 Mapping:
 Filename: /path/to/some/file.dcm (could be read)
-(0012,0063) -> [Penn_BSC_profile_v1.0 ]
+(0012,0063) -> [Penn_BSC_profile_v2.0 ]
 
 
-Each file should have "Penn_BSC_profile_v1.0" for tag
+Each file should have "Penn_BSC_profile_v2.0" for tag
 (0012,0063). This tells you that the de-identification profile was
 applied to each file.  
 
@@ -37,7 +47,7 @@ If you want to check the full set of tags to empty, you can do
   -t 0008,1052 -t 0008,1060 -t 0008,1062 -t 0008,1080 -t 0010,0010 \
   -t 0010,0020 -t 0010,1030 -t 0010,0021 -t 0010,0030 -t 0010,0032 \
   -t 0010,0033 -t 0010,0034 -t 0010,0050 -t 0010,0101 -t 0010,1000 \
-  -t 0010,1001 -t 0010,1002 -t 0010,1005 -t 0010,1010 -t 0010,1020 \
+  -t 0010,1001 -t 0010,1002 -t 0010,1005 -t 0010,1020 \
   -t 0010,1021 -t 0010,1040 -t 0010,1050 -t 0010,1060 -t 0010,1080 \
   -t 0010,1081 -t 0010,1090 -t 0010,1100 -t 0010,2000 -t 0010,2110 \
   -t 0010,2150 -t 0010,2152 -t 0010,2154 -t 0010,2155 -t 0010,2160 \
@@ -82,7 +92,6 @@ Filename: /path/to/some/file.dcm (could be read)
 (0010,1001) -> []
 (0010,1002) -> []
 (0010,1005) -> []
-(0010,1010) -> []
 (0010,1020) -> []
 (0010,1021) -> []
 (0010,1030) -> []
