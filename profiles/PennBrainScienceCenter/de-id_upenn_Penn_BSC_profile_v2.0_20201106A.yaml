@@ -6,6 +6,16 @@
 # If modifying the profile, update the replacement string 
 # for DeidentificationMethod below
 dicom:
+
+  # patient-age-from-birthdate sets the DICOM header as a 3-digit value with a suffix  
+  # be 091D, and that same age in months would be 003M. By default, if  
+  # the age fits in days, then days will be used, # otherwise if it fits in months, then months 
+  # will be used, otherwise years will be used 
+  patient-age-from-birthdate: true 
+
+  # Set patient age units as Years. Other options include months (M) and days (D) 
+  patient-age-units: Y 
+
   fields:
   - name: AccessionNumber
     replace-with: ''
@@ -52,8 +62,6 @@ dicom:
   - name: OtherPatientNames
     replace-with: ''
   - name: PatientAddress
-    replace-with: ''
-  - name: PatientAge
     replace-with: ''
   - name: PatientAlternativeCalendar
     replace-with: ''
@@ -146,4 +154,4 @@ dicom:
   - name: SpecialNeeds
     replace-with: ''
   - name: DeidentificationMethod
-    replace-with: Penn_BSC_profile_v1.0
+    replace-with: Penn_BSC_profile_v2.0
