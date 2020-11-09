@@ -6,6 +6,15 @@
 
 Allow patient age in years to be stored in Flywheel and in the DICOM files.
 
+Flywheel computes the patient age in years from the patient date of birth, and
+then includes this information in the reaped / imported DICOM headers. Patient
+DOB will still be removed, only age as an integer number of years is recorded.
+
+Age in years is not a named identifier under HIPAA, except for patients aged 90
+or older. Special handling of these cases will be required. The profile itself
+does *not* handle these differently.
+
+
 ### 1.0 
 
 As used by the reaper on HUP6 since November 2019.
