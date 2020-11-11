@@ -2,6 +2,12 @@
 
 ## Version history
 
+### 3.0
+
+Allow patient weight to be stored in the Flywheel database and in the DICOM attribute 
+(0010, 1030). Note that Siemens scanners additionally store this information in
+the private header, which we do not modify with this profile.
+
 ### 2.0
 
 Allow patient age in years to be stored in Flywheel and in the DICOM files.
@@ -12,8 +18,7 @@ DOB will still be removed, only age as an integer number of years is recorded.
 
 Age in years is not a named identifier under HIPAA, except for patients aged 90
 or older. Special handling of these cases will be required. The profile itself
-does *not* handle these differently.
-
+does **not** handle these differently.
 
 ### 1.0 
 
@@ -26,7 +31,7 @@ As used by the reaper on HUP6 since November 2019.
     --subject subjectID \
     --session sessionID \
     --output-folder /path/to/testOutput \
-    --profile de-id_upenn_Penn_BSC_profile_v2.0_20201106A.yaml \
+    --profile de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml \
     /path/to/dicomDir aGroup aProject
 
 
@@ -38,13 +43,13 @@ You should get output like this:
 
 done retrieving file list <NUMBER OF FILES> files found.
 Values:
-Penn_BSC_profile_v2.0 
+Penn_BSC_profile_v3.0 
 Mapping:
 Filename: /path/to/some/file.dcm (could be read)
-(0012,0063) -> [Penn_BSC_profile_v2.0 ]
+(0012,0063) -> [Penn_BSC_profile_v3.0 ]
 
 
-Each file should have "Penn_BSC_profile_v2.0" for tag
+Each file should have "Penn_BSC_profile_v3.0" for tag
 (0012,0063). This tells you that the de-identification profile was
 applied to each file.  
 
@@ -54,7 +59,7 @@ If you want to check the full set of tags to empty, you can do
   -t 0008,0050 -t 0008,0090 -t 0008,0092 -t 0008,0094 -t 0008,0096 \
   -t 0008,009c -t 0008,009d -t 0008,1048 -t 0008,1049 -t 0008,1050 \
   -t 0008,1052 -t 0008,1060 -t 0008,1062 -t 0008,1080 -t 0010,0010 \
-  -t 0010,0020 -t 0010,1030 -t 0010,0021 -t 0010,0030 -t 0010,0032 \
+  -t 0010,0020 -t 0010,0021 -t 0010,0030 -t 0010,0032 \
   -t 0010,0033 -t 0010,0034 -t 0010,0050 -t 0010,0101 -t 0010,1000 \
   -t 0010,1001 -t 0010,1002 -t 0010,1005 -t 0010,1020 \
   -t 0010,1021 -t 0010,1040 -t 0010,1050 -t 0010,1060 -t 0010,1080 \
@@ -103,7 +108,6 @@ Filename: /path/to/some/file.dcm (could be read)
 (0010,1005) -> []
 (0010,1020) -> []
 (0010,1021) -> []
-(0010,1030) -> []
 (0010,1040) -> []
 (0010,1050) -> []
 (0010,1060) -> []

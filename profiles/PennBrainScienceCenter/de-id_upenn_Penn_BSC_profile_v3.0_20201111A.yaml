@@ -101,8 +101,6 @@ dicom:
     replace-with: ''
   - name: PatientTelephoneNumbers
     replace-with: ''
-  - name: PatientWeight
-    replace-with: ''
   - name: PerformingPhysicianIdentificationSequence
     replace-with: ''
   - name: PerformingPhysicianName
