@@ -152,4 +152,4 @@ dicom:
   - name: SpecialNeeds
     replace-with: ''
   - name: DeidentificationMethod
-    replace-with: Penn_BSC_profile_v2.0
+    replace-with: Penn_BSC_profile_v3.0
