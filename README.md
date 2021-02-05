@@ -1,10 +1,18 @@
 # fwCustomDeidentification
 
 Script to generate a custom profile for de-identification of data by the Flywheel CLI.
-The profiles here are designed for uploading data to the UPenn Flywheel only. The data
+The profiles here are designed for uploading data to the UPenn Flywheel only,
+and to provide a record of previously used profiles on legacy data. The data
 should be kept confidential and accessible only by approved personnel. 
 
+Note that **private tags** are **NOT** modified by these profiles. Data from new
+sources, whether inside or outside of Penn, should be checked carefully for
+identifiers in private tags. Flywheel can [de-identify private
+tags](https://docs.flywheel.io/hc/en-us/articles/360024577194-How-to-de-identify-private-DICOM-tags)
+but requires extra steps to do so. 
+
 The profiles here are **NOT** suitable for any kind of public data sharing.
+
 
 ## Example usage 
 
@@ -21,17 +29,17 @@ fw import dicom /path/to/dicomDir pennftdcenter aProject \
 
 This does a dry run, outputing data to a local file system. Without
 the `--output-folder` option, the data will be imported to
-Flywheel. See the [Flywheel documentation](https://docs.flywheel.io/hc/en-us/articles/360008548134-CLI-Command-import-dicom-)
+Flywheel. See the [Flywheel
+documentation](https://docs.flywheel.io/hc/en-us/articles/360008548134-CLI-Command-import-dicom-)
 for more information.
 
 
 ## Included profiles
 
 Most users should use the official profile at
-`profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v1.0_20190906A.yaml`. This
-is the same profile used for data reaped from HUP6. See the README
-there for some examples on how to test the output for successful
-de-identification.
+`profiles/PennBrainScienceCenter/`. This is the same profile used for data
+reaped from HUP6. See the README there for some examples on how to test the
+output for successful de-identification.
 
 
 ## Custom de-identification profiles
