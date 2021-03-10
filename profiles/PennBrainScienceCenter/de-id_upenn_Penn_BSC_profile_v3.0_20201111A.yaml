@@ -19,8 +19,8 @@ dicom:
 
   # Use the original name rather than the default of <SOPInstanceUID>.<Modality>.dcm
   filenames:
-    - output: '^(?P<filename>.*)$'
-      input-regex: '{filename}'
+    - output: '{file_name}'
+      input-regex: '^(?P<file_name>.*)$'
 
   # patient-age-from-birthdate sets the DICOM header as a 3-digit value with a suffix  
   # be 091D, and that same age in months would be 003M. By default, if  
