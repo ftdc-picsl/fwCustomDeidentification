@@ -7,6 +7,21 @@
 # for DeidentificationMethod below
 dicom:
 
+  # When processing a file to be de-identified, match dicom profile to files
+  # matching the patterns listed. Other file types (like zip) have the typical
+  # extensions by default, but some services leveraging the migration-toolkit
+  # expect no default
+  file-filter:
+    - "*.dcm*"
+    - "*.DCM*"
+    - "*.ima*"
+    - "*.IMA*"
+
+  # Use the original name rather than the default of <SOPInstanceUID>.<Modality>.dcm
+  filenames:
+    - output: '^(?P<filename>.*)$'
+      input-regex: '{filename}'
+
   # patient-age-from-birthdate sets the DICOM header as a 3-digit value with a suffix  
   # be 091D, and that same age in months would be 003M. By default, if  
   # the age fits in days, then days will be used, # otherwise if it fits in months, then months 
@@ -153,3 +168,12 @@ dicom:
     replace-with: ''
   - name: DeidentificationMethod
     replace-with: Penn_BSC_profile_v3.0
+
+# Zip file profile is necessary for DICOM zips - if the configuration settings
+# within aren't needed, the bare `zip:` is still required to process dicom
+# zips
+zip:
+  # Allow files that are not DICOM to be re-packaged in output zip without
+  # raising exceptions - we don't want to lose any non-dicom files in zips in
+  # case the user intended this
+  allow-unmatched-files: true
