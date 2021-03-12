@@ -1,5 +1,10 @@
 # Penn Brain Science Center de-identification profile
 
+Use `de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` for importing raw DICOM. 
+
+The other file `fw_PHI_cleanup_deployment_de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` has additional options set for importing ZIP archives, which may contain a mixture of DICOM and non-DICOM files.
+
+
 ## Version history
 
 ### 3.0
