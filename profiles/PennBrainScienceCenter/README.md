@@ -1,6 +1,6 @@
 # Penn Brain Science Center de-identification profile
 
-Use `de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` for importing raw DICOM. 
+Use `de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` for importing raw DICOM with older code (using `fw import dicom`. Use `ingest-config-de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` for newer code (using `fw ingest dicom`).
 
 The other file `fw_PHI_cleanup_deployment_de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` has additional options set for importing ZIP archives, which may contain a mixture of DICOM and non-DICOM files.
 
@@ -30,17 +30,11 @@ does **not** handle these differently.
 As used by the reaper on HUP6 since November 2019.
 
 
-## Example use with the CLI
+## Verifying de-identification
 
-  fw import dicom \
-    --subject subjectID \
-    --session sessionID \
-    --output-folder /path/to/testOutput \
-    --profile de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml \
-    /path/to/dicomDir aGroup aProject
+The `fw ingest dicom` command lacks the `--dry-run` feature provided with `fw import dicom`. There is an alternative in the latest `fw` (15.8.9) called `fw deid test`, which lets you test a de-id profile. Unfortunately, `fw ingest dicom` requires a **config** file containing a profile, and `fw deid test` requires a profile alone. This means you have to use the de-id **profile** to test, then do the ingest with the **config** file containing the profile. Not great, but we provide both filtes here and will do our best to keep them consistent. 
 
-
-You can examine dicom images after a dry run with gdcmscanner.
+After ingest, you can download and examine dicom images with gdcmscanner. 
 
   gdcmscanner -p -r -d  /path/to/flywheel/data -t 0012,0063 | more
 
