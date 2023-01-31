@@ -1,6 +1,6 @@
 # fwCustomDeidentification
 
-Script to generate a custom profile for de-identification of data by the Flywheel CLI.
+Scripts to generate a custom profile for de-identification of data in Flywheel.
 The profiles here are designed for uploading data to the UPenn Flywheel only,
 and to provide a record of previously used profiles on legacy data. The data
 should be kept confidential and accessible only by approved personnel.
@@ -13,55 +13,41 @@ but requires extra steps to do so.
 
 The profiles here are **NOT** suitable for any kind of public data sharing.
 
-## Example usage
+**Update 2023-01-31**: The CLI user interface has changed, and the site de-identification
+profile is applied automatically on import. Attempting to de-identify the data by any
+other means will raise an error. Ingest dicom data with the `fw ingest dicom` command,
+without `--de-identify` or any profiles in config file.
 
-The CLI user interface has changed and the command `fw import dicom` is now
-deprecated. The profile has to be incorporated into a **config** file for use
-with the new command `fw ingest dicom`. A config file containing the BSC de-id
-fields is in `profiles/PennBrainScienceCenter/`. An example call:
-
-```
-fw ingest dicom --jobs 1 \
-  --subject subjectLabel --session sessionLabel \
-  --config ingest-config-de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml \
-  /path/to/dicomDir AGroup AProject
-```
-
-Unfortunately, `fw ingest dicom` does not have the `--output-folder` command, so
-there's no easy way to test de-id settings before uploading data. This will be
-addressed in future versions of `fw`, but for now the only solution is to test a
-single upload and vet the results. This should be done with dummy data,
-de-identified by hand with something like
-[DCMTK](https://support.dcmtk.org/docs/index.html).
-
-## Included profiles
-
-Most users should use the official profile at
-`profiles/PennBrainScienceCenter/`. This is the same profile used for data
-reaped from HUP6. See the README there for some examples on how to test the
-output for successful de-identification.
-
-The Penn BSC profile is also included in config file format. Other profiles will
-need to be converted to the config format to work with `fw ingest dicom`.
+If you require a different de-identification profile than the site default, please contact
+the site admin Gaylord Holder to discuss options.
 
 
-## Custom de-identification profiles
+## Penn site profile
 
-For more background and examples of other capabilities, see [Custom
-de-Identification of dicom field through the CLI](https://docs.flywheel.io/hc/en-us/articles/360008972493-Custom-de-Identification-of-dicom-field-through-the-CLI).
+The [site
+profile](https://github.com/ftdc-picsl/fwCustomDeidentification/blob/master/profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
+removes direct identifiers and several indirect identifiers not normally required for
+research use. Certain indirect identifiers important for research (such as PatientWeight)
+are retained.
+
+Data received from the scanner connectors is automatically de-identified using this
+protocol.
+
+Data imported via the web "DICOM Upload" interface also has this profile applied, unless a
+project-level profile is present. Contact the admins if you need customized de-identification.
 
 
 ## Generating a profile
 
 First define CSV files containing tags to remove or replace, following the format shown in
-the `profiles/` directory. A dictionary of keywords is included under the `dicom/`
-directory. There's also an example there showing how to access the dictionary in
-`pydicom`.
+the `profiles/` directory. A dictionary of keywords (possibly outdated) is included under
+the `dicom/` directory. There's also an example there showing how to access the dictionary
+in `pydicom`.
 
-When you have the tags you want to process, run
-`config/generateDeidConfig.pl`.
+When you have the tags you want to process, run `config/generateDeidConfig.pl`.
 
-Always test the profile first before sending data to Flywheel.
+
+## Testing a profile
 
 
 ## Further reading on de-identification

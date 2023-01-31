@@ -1,15 +1,19 @@
 # Penn Brain Science Center de-identification profile
 
-Use `de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` for importing raw DICOM with older code (using `fw import dicom`. Use `ingest-config-de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` for newer code (using `fw ingest dicom`).
+The site profile `de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` is used to deidentify
+all data imported to Flywheel by default.
 
-The other file `fw_PHI_cleanup_deployment_de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` has additional options set for importing ZIP archives, which may contain a mixture of DICOM and non-DICOM files.
+The other file
+`fw_PHI_cleanup_deployment_de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml` has
+additional options set for importing ZIP archives, which may contain a mixture of DICOM
+and non-DICOM files.
 
 
 ## Version history
 
 ### 3.0
 
-Allow patient weight to be stored in the Flywheel database and in the DICOM attribute 
+Allow patient weight to be stored in the Flywheel database and in the DICOM attribute
 (0010, 1030). Note that Siemens scanners additionally store this information in
 the private header, which we do not modify with this profile.
 
@@ -25,16 +29,17 @@ Age in years is not a named identifier under HIPAA, except for patients aged 90
 or older. Special handling of these cases will be required. The profile itself
 does **not** handle these differently.
 
-### 1.0 
+### 1.0
 
 As used by the reaper on HUP6 since November 2019.
 
 
 ## Verifying de-identification
 
-The `fw ingest dicom` command lacks the `--dry-run` feature provided with `fw import dicom`. There is an alternative in the latest `fw` (15.8.9) called `fw deid test`, which lets you test a de-id profile. Unfortunately, `fw ingest dicom` requires a **config** file containing a profile, and `fw deid test` requires a profile alone. This means you have to use the de-id **profile** to test, then do the ingest with the **config** file containing the profile. Not great, but we provide both filtes here and will do our best to keep them consistent. 
+To test the deidentification profile, use `fw deid test`. This will produce a CSV file
+with the keywords and values removed from a data set.
 
-After ingest, you can download and examine dicom images with gdcmscanner. 
+After ingest, you can download and examine dicom images with gdcmscanner.
 
   gdcmscanner -p -r -d  /path/to/flywheel/data -t 0012,0063 | more
 
@@ -42,7 +47,7 @@ You should get output like this:
 
 done retrieving file list <NUMBER OF FILES> files found.
 Values:
-Penn_BSC_profile_v3.0 
+Penn_BSC_profile_v3.0
 Mapping:
 Filename: /path/to/some/file.dcm (could be read)
 (0012,0063) -> [Penn_BSC_profile_v3.0 ]
@@ -50,7 +55,7 @@ Filename: /path/to/some/file.dcm (could be read)
 
 Each file should have "Penn_BSC_profile_v3.0" for tag
 (0012,0063). This tells you that the de-identification profile was
-applied to each file.  
+applied to each file.
 
 If you want to check the full set of tags to empty, you can do
 
@@ -72,7 +77,7 @@ If you want to check the full set of tags to empty, you can do
 
 This will print the same summary of values, followed by a mapping for
 each file. In this case you will want to see that no values are found
-except for an empty string. If you want to be super sure, 
+except for an empty string.
 
 Values:
 
