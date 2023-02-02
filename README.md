@@ -13,10 +13,13 @@ but requires extra steps to do so.
 
 The profiles here are **NOT** suitable for any kind of public data sharing.
 
-**Update 2023-01-31**: The CLI user interface has changed, and the site de-identification
-profile is applied automatically on import. Attempting to de-identify the data by any
-other means will raise an error. Ingest dicom data with the `fw ingest dicom` command,
-without `--de-identify` or any profiles in config file.
+**Update 2023-01-31**: The site de-identification profile is now applied automatically on
+import with `fw ingest dicom`. Attempting to de-identify the data by any other means will
+raise an error. Ingest dicom data with the `fw ingest dicom` command, without
+`--de-identify` or any profiles in config file.
+
+**Do not use older versions of the code with `fw import dicom` to import data to
+Flywheel**.
 
 If you require a different de-identification profile than the site default, please contact
 the site admin Gaylord Holder to discuss options.
@@ -25,7 +28,7 @@ the site admin Gaylord Holder to discuss options.
 ## Penn site profile
 
 The [site
-profile](https://github.com/ftdc-picsl/fwCustomDeidentification/blob/master/profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
+profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
 removes direct identifiers and several indirect identifiers not normally required for
 research use. Certain indirect identifiers important for research (such as PatientWeight)
 are retained.
@@ -34,10 +37,24 @@ Data received from the scanner connectors is automatically de-identified using t
 protocol.
 
 Data imported via the web "DICOM Upload" interface also has this profile applied, unless a
-project-level profile is present. Contact the admins if you need customized de-identification.
+project-level profile is present. Contact the site admin if you need customized
+de-identification.
+
+Data ingested via the `fw ingest dicom` command also applies the site profile.
+
+Older versions of the `fw` program allow the use of `fw import dicom`, which require a
+profile on the command line. **Do not use `fw import dicom` to import data to Flywheel**. It
+will not de-identify data sufficiently without a custom profile.
 
 
-## Generating a profile
+## Example data
+
+Test data is available in the `exampleData/` directory. Please see the README for details. The
+data is derived from a publicly available de-identification test data set. If used in
+research, please include the citations in the README.
+
+
+## Generating a new profile
 
 First define CSV files containing tags to remove or replace, following the format shown in
 the `profiles/` directory. A dictionary of keywords (possibly outdated) is included under
@@ -45,9 +62,6 @@ the `dicom/` directory. There's also an example there showing how to access the 
 in `pydicom`.
 
 When you have the tags you want to process, run `config/generateDeidConfig.pl`.
-
-
-## Testing a profile
 
 
 ## Further reading on de-identification
