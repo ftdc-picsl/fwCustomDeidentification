@@ -36,14 +36,14 @@ fw ingest dicom \
 
 After ingest, click on the information button to see metadata extracted from the DICOM headers
 
-![Flywheel web session acquisitions view](exampleData/screenCaps/session_acquisitions.jpg)
+![Flywheel web session acquisitions view](/exampleData/screenCaps/session_acquisitions.jpg)
 
 In particular, see that the DeidentificationMethod is correct and identifying patient
 information is removed.
 
-[Flywheel file information window](exampleData/screenCaps/metadata_info_deidmethod.jpg)
+![Flywheel file information window](/exampleData/screenCaps/metadata_info_deidmethod.jpg)
 
-[Flywheel file information window 2](exampleData/screenCaps/metadata_info_patient.jpg)
+![Flywheel file information window 2](/exampleData/screenCaps/metadata_info_patient.jpg)
 
 
 ## Comparing the original and de-identified data.
