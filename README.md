@@ -1,31 +1,22 @@
 # fwCustomDeidentification
 
-Scripts to generate a custom profile for de-identification of data in Flywheel.
-The profiles here are designed for uploading data to the UPenn Flywheel only,
-and to provide a record of previously used profiles on legacy data. The data
-should be kept confidential and accessible only by approved personnel.
+**Update 2023-02-06**: The profiles here are applied automatically for most users uploading
+DICOM data. The [site
+profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
+is now applied automatically on import with `fw ingest dicom`, or via the web interface.
 
-Note that **private tags** are **NOT** modified by these profiles. Data from new
-sources, whether inside or outside of Penn, should be checked carefully for
-identifiers in private tags. Flywheel can [de-identify private
-tags](https://docs.flywheel.io/hc/en-us/articles/360024577194-How-to-de-identify-private-DICOM-tags)
-but requires extra steps to do so.
-
-The profiles here are **NOT** suitable for any kind of public data sharing.
-
-**Update 2023-01-31**: The site de-identification profile is now applied automatically on
-import with `fw ingest dicom`. Attempting to de-identify the data by any other means will
-raise an error. Ingest dicom data with the `fw ingest dicom` command, without
-`--de-identify` or any profiles in config file.
+Attempting to de-identify the data by any other means will raise an error. Ingest dicom
+data with the `fw ingest dicom` command, without `--de-identify` or any profiles in config
+file.
 
 **Do not use older versions of the code with `fw import dicom` to import data to
 Flywheel**.
 
-If you require a different de-identification profile than the site default, please contact
+If you require a different de-identification profile than the site profile, please contact
 the site admin Gaylord Holder to discuss options.
 
 
-## Penn site profile
+## How the de-identification works
 
 The [site
 profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
@@ -47,11 +38,61 @@ profile on the command line. **Do not use `fw import dicom` to import data to Fl
 will not de-identify data sufficiently without a custom profile.
 
 
-## Example data
+## Limitations of automated de-identification
 
-Test data is available in the `exampleData/` directory. Please see the README for details. The
-data is derived from a publicly available de-identification test data set. If used in
-research, please include the citations in the README.
+The [site
+profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
+removes standard dicom tags that are designed to contain direct identifiers. It also
+removes some indirect identifiers that might give clues to the patient's identity or other
+sensitive information like menstruation or pregnancy status. However, there are some
+limitations to automated de-identification. Investigators must share responsibility for
+protecting participant privacy.
+
+Potential compromises of patient information may occur through
+
+* Private DICOM tags. Private tags are **NOT** modified by the site profile. Data from new
+  sources, whether inside or outside of Penn, should be checked carefully for
+  identifiers in private tags. Flywheel can [de-identify private
+  tags](https://docs.flywheel.io/hc/en-us/articles/360024577194-How-to-de-identify-private-DICOM-tags)
+  but requires extra steps to do so.
+
+* Identifiers included in text fields such as ImageComments or StudyComments. The
+  PatientComments tag is removed by the profile, others are not because they are often
+  used to store image information or to route data to the correct location in Flywheel.
+  Investigators should ensure that text fields are never used to store identifiers.
+
+* Burned-in annotations. Clinical data may have patient information present in the pixel
+  data. This needs special handling.
+
+* Identifiers in non-DICOM imaging data. It is theoretically possible, though rare, for
+  identifiers to be present in NIFTI image data. Headers and images for data from any new
+  source should be checked manually.
+
+
+## Further de-identification for data sharing
+
+The site profiles do remove all potential indirect identifiers. Information that
+identifies the study date, scanner, or internal study identifiers can remain present in
+the header.
+
+Custom secondary de-identification is available through the [deid-export
+](https://gitlab.com/flywheel-io/flywheel-apps/deid-export) gear.
+
+
+## Repository contents
+
+* Scripts to generate a custom profile for de-identification of data in Flywheel.
+  The profiles here are designed for uploading data to the UPenn Flywheel only,
+  and to provide a record of previously used profiles on legacy data. The data
+  should be kept confidential and accessible only by approved personnel. The profiles here
+  are **NOT** suitable for any kind of public data sharing.
+
+* Example data containing synthesized PHI, that can be used to test import procedures.
+  This data is derived from a publicly available de-identification test data set. If used
+  in research, please include the citations in the README.
+
+* A script to check dicom files within a project and report the presence of common
+  identifiers and the tag (0012,0063) DeidentificationMethod.
 
 
 ## Generating a new profile
@@ -61,7 +102,8 @@ the `profiles/` directory. A dictionary of keywords (possibly outdated) is inclu
 the `dicom/` directory. There's also an example there showing how to access the dictionary
 in `pydicom`.
 
-When you have the tags you want to process, run `config/generateDeidConfig.pl`.
+When you have the tags you want to process, run `config/generateDeidConfig.pl`. Test with
+the example data before use.
 
 
 ## Further reading on de-identification
