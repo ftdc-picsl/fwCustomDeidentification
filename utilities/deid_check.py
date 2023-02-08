@@ -4,8 +4,46 @@ import argparse
 import flywheel
 import pandas as pd
 
+def add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patient_identifier_keys, data_dict):
+    acq_label = acq.label
+    acq_id = acq.id
+    # Loop over all files, but check only dicom
+    # Usually only one dicom per acquisition but not always
+    for f in acq.files:
+        if f.type != 'dicom':
+            continue
+        f = f.reload()
+        file_name = f.name
+        file_user = f.origin['id']
+        file_created = str(f.created.date())
+        file_info = f.info
+        file_deid_method = pd.NA
+        file_has_patient_identifiers = False
+        file_has_info = True
+        if (file_info):
+            if ('DeidentificationMethod' in file_info):
+                file_deid_method = file_info['DeidentificationMethod']
+            file_has_patient_identifiers = any([id_key for id_key in patient_identifier_keys if id_key in file_info])
+        else:
+            # This happens if the file has not had any classifiers run on it
+            file_has_info = False
+
+        data_dict['subject_id'].append(sub_id)
+        data_dict['subject_label'].append(sub_label)
+        data_dict['session_id'].append(ses_id)
+        data_dict['session_label'].append(ses_label)
+        data_dict['acquisition_id'].append(acq_id)
+        data_dict['acquisition_label'].append(acq_label)
+        data_dict['file_name'].append(file_name)
+        data_dict['file_user'].append(file_user)
+        data_dict['file_created'].append(file_created)
+        data_dict['file_has_info'].append(file_has_info)
+        data_dict['file_deidentification_method'].append(file_deid_method)
+        data_dict['file_has_patient_identifiers'].append(file_has_patient_identifiers)
+
+
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-                                 prog="deid_check", add_help=True, description='''
+                                 prog="deid_check", add_help=False, description='''
 Script to check Flywheel DICOM file / archive metadata for de-identification method and common
 patient identifiers.
 
@@ -42,6 +80,12 @@ What this script does not do:
 required = parser.add_argument_group('Required arguments')
 required.add_argument("group", help="Group label", type=str)
 required.add_argument("project", help="Project label", type=str)
+
+optional = parser.add_argument_group('Optional arguments')
+optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
+optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. " \
+                      "Use this to check a subset of sessions in the project.", type=str, default = None)
+
 args = parser.parse_args()
 
 fw = flywheel.Client()
@@ -67,64 +111,43 @@ patient_identifier_keys = ['AdditionalPatientHistory', 'CurrentPatientLocation',
 
 group_label = args.group
 project_label = args.project
+sessions_fn = args.sessions
 
 # Get the project
 project = fw.lookup(f"{group_label}/{project_label}")
 
-# Get the subjects in the project as an iterator so they don't need to be returned
-# All at once - this saves time upfront.
-subjects = project.subjects.iter()
-
-# Loop over the subjects
-for sub in subjects:
-    # Get the subject label for our data_dict
-    sub_label = sub.label
-    sub_id = sub.id
-    # Get this subject's sessions as an iterator and loop through them
-    sessions = sub.sessions.iter()
-    for ses in sessions:
-        # Get the session's label for our data_dict
+if sessions_fn is not None:
+    with open(sessions_fn, 'r') as sessions_io:
+        session_ids = [ ses_id.rstrip() for ses_id in sessions_io.readlines()]
+    for ses_id in session_ids:
+        ses = fw.get(ses_id)
+        sub = ses.subject
+        sub_label = sub.label
+        sub_id = sub.id
         ses_label = ses.label
-        ses_id = ses.id
-        # Get this session's acquisitions as an iterator and loop through them
         acquisitions = ses.acquisitions.iter()
         for acq in acquisitions:
-            # Get the acquisition's label
-            acq_label = acq.label
-            acq_id = acq.id
-            # Loop over all files, but check only dicom
-            # Usually only one dicom per acquisition but not always
-            for f in acq.files:
-                if f.type != 'dicom':
-                    continue
-                f = f.reload()
-                file_name = f.name
-                file_user = f.origin['id']
-                file_created = str(f.created.date())
-                file_info = f.info
-                file_deid_method = pd.NA
-                file_has_patient_identifiers = False
-                file_has_info = True
-                if (file_info):
-                    if ('DeidentificationMethod' in file_info):
-                        file_deid_method = file_info['DeidentificationMethod']
-                    file_has_patient_identifiers = any([id_key for id_key in patient_identifier_keys if id_key in file_info])
-                else:
-                    # This happens if the file has not had any classifiers run on it
-                    file_has_info = False
+            add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patient_identifier_keys, data_dict)
+else:
+    # Get the subjects in the project as an iterator so they don't need to be returned
+    # All at once - this saves time upfront.
+    subjects = project.subjects.iter()
 
-                data_dict['subject_id'].append(sub_id)
-                data_dict['subject_label'].append(sub_label)
-                data_dict['session_id'].append(ses_id)
-                data_dict['session_label'].append(ses_label)
-                data_dict['acquisition_id'].append(acq_id)
-                data_dict['acquisition_label'].append(acq_label)
-                data_dict['file_name'].append(file_name)
-                data_dict['file_user'].append(file_user)
-                data_dict['file_created'].append(file_created)
-                data_dict['file_has_info'].append(file_has_info)
-                data_dict['file_deidentification_method'].append(file_deid_method)
-                data_dict['file_has_patient_identifiers'].append(file_has_patient_identifiers)
+    # Loop over the subjects
+    for sub in subjects:
+        # Get the subject label for our data_dict
+        sub_label = sub.label
+        sub_id = sub.id
+        # Get this subject's sessions as an iterator and loop through them
+        sessions = sub.sessions.iter()
+        for ses in sessions:
+            # Get the session's label for our data_dict
+            ses_label = ses.label
+            ses_id = ses.id
+            # Get this session's acquisitions as an iterator and loop through them
+            acquisitions = ses.acquisitions.iter()
+            for acq in acquisitions:
+                add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patient_identifier_keys, data_dict)
 
 # Convert the dict to a pandas dataframe
 df = pd.DataFrame.from_dict(data_dict)
