@@ -23,7 +23,10 @@ def add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patien
         if (file_info):
             if ('DeidentificationMethod' in file_info):
                 file_deid_method = file_info['DeidentificationMethod']
-            file_has_patient_identifiers = any([id_key for id_key in patient_identifier_keys if id_key in file_info])
+            identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in file_info]
+            for key in identifier_keys:
+                if len(file_info[key]) > 0:
+                    file_has_patient_identifiers = True
         else:
             # This happens if the file has not had any classifiers run on it
             file_has_info = False
