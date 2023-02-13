@@ -64,3 +64,14 @@ script for details. If your project deliberately contains any values in these fi
 column will not be useful, and you will need to modify the script to check fields that
 shouldn't exist, and to check fields that do exist conform to expectations (eg the format
 of a coded value in PatientID).
+
+
+## dicom_upload_device.py
+
+`dicom_upload_device.py` outputs information about the device or user who uploaded a
+particular DICOM file / archive. This can be helpful to distinguish manually uploaded
+files from those produced from a dicom connector.
+
+The device ID is also output by `deid_check.py`, but this script runs faster so if you
+want to check only manual uploads, you can find them with this script and then pass
+sessions to `deid_check.py` with `--sessions`.
