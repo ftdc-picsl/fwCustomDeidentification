@@ -1,6 +1,8 @@
 # Utilities
 
-Scripts to help identify de-identification issues.
+Scripts to help identify de-identification issues. These require the [Flywheel
+SDK](https://pypi.org/project/flywheel-sdk/).
+
 
 ## deid_check.py
 
