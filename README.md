@@ -122,4 +122,8 @@ automated software while at the same time retaining all useful information." A m
 detailed discussion of their de-identification routines can be found on the [Cancer Imaging
 Archive Wiki](https://wiki.cancerimagingarchive.net/display/Public/Submission+and+De-identification+Overview).
 
+[Report of the Medical Image De-Identification (MIDI) Task Group -- Best
+Practices and Recommendations](http://arxiv.org/abs/2303.10473). Preprint
+discussing the complex issues surrounding de-identification for public
+data sharing. 
 
