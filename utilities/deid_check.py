@@ -3,14 +3,13 @@
 import argparse
 import flywheel
 import pandas as pd
+import re
 
-def add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patient_identifier_keys, data_dict):
+def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, file_type, patient_identifier_keys, data_dict):
     acq_label = acq.label
     acq_id = acq.id
-    # Loop over all files, but check only dicom
-    # Usually only one dicom per acquisition but not always
     for f in acq.files:
-        if f.type != 'dicom':
+        if file_type != 'all' and f.type != file_type:
             continue
         f = f.reload()
         file_name = f.name
@@ -19,6 +18,7 @@ def add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patien
         file_info = f.info
         file_deid_method = pd.NA
         file_has_patient_identifiers = False
+        file_patient_identifiers_populated = False
         file_has_info = True
         if (file_info):
             if ('DeidentificationMethod' in file_info):
@@ -27,6 +27,10 @@ def add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patien
             for key in identifier_keys:
                 if len(file_info[key]) > 0:
                     file_has_patient_identifiers = True
+                    # Check if file_info[key] contains alphanumeric characters
+                    if any(char.isalnum() for char in file_info[key]):
+                        if re.search('[0-9a-zA-Z]', file_info[key]):
+                            file_patient_identifiers_populated = True
         else:
             # This happens if the file has not had any classifiers run on it
             file_has_info = False
@@ -43,6 +47,7 @@ def add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patien
         data_dict['file_has_info'].append(file_has_info)
         data_dict['file_deidentification_method'].append(file_deid_method)
         data_dict['file_has_patient_identifiers'].append(file_has_patient_identifiers)
+        data_dict['file_patient_identifiers_populated'].append(file_patient_identifiers_populated)
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -88,6 +93,7 @@ optional = parser.add_argument_group('Optional arguments')
 optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
 optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. " \
                       "Use this to check a subset of sessions in the project.", type=str, default = None)
+optional.add_argument("-t", "--file-type", help="File type to check, or 'all' to check all types", type=str, default="dicom")
 
 args = parser.parse_args()
 
@@ -97,7 +103,7 @@ fw = flywheel.Client()
 data_dict = {'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[],
              'acquisition_id':[], 'acquisition_label':[], 'file_name':[],'file_user':[],
              'file_created':[], 'file_has_info':[], 'file_deidentification_method':[],
-             'file_has_patient_identifiers':[]}
+             'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[]}
 
 # List of patient direct identifiers to check. If ANY of these exist for a file,
 # then set file_has_patient_identifiers = True
@@ -130,7 +136,7 @@ if sessions_fn is not None:
         ses_label = ses.label
         acquisitions = ses.acquisitions.iter()
         for acq in acquisitions:
-            add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patient_identifier_keys, data_dict)
+            add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, args.file_type, patient_identifier_keys, data_dict)
 else:
     # Get the subjects in the project as an iterator so they don't need to be returned
     # All at once - this saves time upfront.
@@ -150,12 +156,12 @@ else:
             # Get this session's acquisitions as an iterator and loop through them
             acquisitions = ses.acquisitions.iter()
             for acq in acquisitions:
-                add_acquisition_dicom_info(sub_id, sub_label, ses_id, ses_label, acq, patient_identifier_keys, data_dict)
+                add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, args.file_type, patient_identifier_keys, data_dict)
 
 # Convert the dict to a pandas dataframe
 df = pd.DataFrame.from_dict(data_dict)
 
 # write file
 
-filename = f"{group_label}_{project_label}_dicom_deid_report.csv"
+filename = f"{group_label}_{project_label}_{args.file_type}_deid_report.csv"
 df.to_csv(filename,index=False, na_rep = 'NA')
