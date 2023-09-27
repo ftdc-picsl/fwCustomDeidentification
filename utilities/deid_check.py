@@ -29,8 +29,7 @@ def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, file_ty
                     file_has_patient_identifiers = True
                     # Check if file_info[key] contains alphanumeric characters
                     if any(char.isalnum() for char in file_info[key]):
-                        if re.search('[0-9a-zA-Z]', file_info[key]):
-                            file_patient_identifiers_populated = True
+                        file_patient_identifiers_populated = True
         else:
             # This happens if the file has not had any classifiers run on it
             file_has_info = False

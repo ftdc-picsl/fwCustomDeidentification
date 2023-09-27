@@ -67,6 +67,14 @@ column will not be useful, and you will need to modify the script to check field
 shouldn't exist, and to check fields that do exist conform to expectations (eg the format
 of a coded value in PatientID).
 
+```
+file_patient_identifiers_populated
+```
+
+TRUE if any of the patient ID fields are populated with alphanumeric characters. This
+catches some cases where patient fields exist, but are populated with empty space or
+metacharacters like "^^^^^^".
+
 
 ## dicom_upload_device.py
 
