@@ -62,10 +62,7 @@ file_has_patient_identifiers
 ```
 
 TRUE if the file has any of the direct patient identifiers tested in the script. See
-script for details. If your project deliberately contains any values in these fields, this
-column will not be useful, and you will need to modify the script to check fields that
-shouldn't exist, and to check fields that do exist conform to expectations (eg the format
-of a coded value in PatientID).
+script for details. Empty fields are not counted.
 
 ```
 file_patient_identifiers_populated
@@ -74,6 +71,18 @@ file_patient_identifiers_populated
 TRUE if any of the patient ID fields are populated with alphanumeric characters. This
 catches some cases where patient fields exist, but are populated with empty space or
 metacharacters like "^^^^^^".
+
+If your project deliberately contains any alphanumeric values in these fields, this
+column will not be useful, and you will need to modify the script to check fields that
+shouldn't exist, and to check fields that do exist conform to expectations (eg the format
+of a coded value in PatientID).
+
+
+## deid_header_check.py
+
+A similar script to deid_check.py, but this checks DICOM files directly instead of
+metadata. It is therefore slower can can download a substantial amount of data for large
+projects.
 
 
 ## dicom_upload_device.py
