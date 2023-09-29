@@ -19,7 +19,9 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
             continue
         for f in acq.files:
             if (f.type == 'dicom'):
-                if (f.name.lower().endswith('.zip')) and f.zip_member_count:
+                # Should be able to use f.zip_member_count, but this sometimes None
+                # even when the zip file is not empty
+                if (f.name.lower().endswith('.zip')) and f.size > 512:
                     test_acq = acq
                     test_file = f
                     break
@@ -62,23 +64,30 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
     fw_dcm = test_file.get_zip_info().members[0]
     test_file.download_zip_member(fw_dcm.path, tmp_dcm_file)
 
-    dcm = pydicom.dcmread(tmp_dcm_file)
+    # try to read the file, but catch exception
+    try:
+        dcm = pydicom.dcmread(tmp_dcm_file)
+
+        if ('DeidentificationMethod' in dcm):
+            dcm_deid_method = dcm['DeidentificationMethod'].value
+
+        identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in dcm]
+
+        for key in identifier_keys:
+            # Need to enumerate data element here and check if empty
+            element = dcm.data_element(key)
+            if not element.is_empty:
+                dcm_has_patient_identifiers = True
+                # Check for alphanumeric characters
+                if any(char.isalnum() for char in str(element.value)):
+                    dcm_patient_identifiers_populated = True
+    except pydicom.errors.InvalidDicomError:
+        print(f"Cannot read dicom from {sub_label}/{ses_label}/{acq_label}/{file_name}")
+        dcm_deid_method = 'InvalidDicomError'
+        dcm_has_patient_identifiers = 'InvalidDicomError'
+        dcm_patient_identifiers_populated = 'InvalidDicomError'
 
     os.remove(tmp_dcm_file)
-
-    if ('DeidentificationMethod' in dcm):
-        dcm_deid_method = dcm['DeidentificationMethod'].value
-
-    identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in dcm]
-
-    for key in identifier_keys:
-        # Need to enumerate data element here and check if empty
-        element = dcm.data_element(key)
-        if not element.is_empty:
-            dcm_has_patient_identifiers = True
-            # Check for alphanumeric characters
-            if any(char.isalnum() for char in str(element.value)):
-                dcm_patient_identifiers_populated = True
 
     data_dict['subject_id'].append(sub_id)
     data_dict['subject_label'].append(sub_label)
@@ -182,12 +191,16 @@ if sessions_fn is not None:
     with open(sessions_fn, 'r') as sessions_io:
         session_ids = [ ses_id.rstrip() for ses_id in sessions_io.readlines()]
     for ses_id in session_ids:
-        ses = fw.get(ses_id)
-        sub = ses.subject
-        sub_label = sub.label
-        sub_id = sub.id
-        ses_label = ses.label
-        add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier_keys, data_dict)
+        try:
+            ses = fw.get(ses_id)
+            sub = ses.subject
+            sub_label = sub.label
+            sub_id = sub.id
+            ses_label = ses.label
+            add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier_keys, data_dict)
+        except flywheel.ApiException as e:
+            print(f"Cannot get session {ses_id}: {e}")
+            continue
 else:
     # Get the subjects in the project as an iterator so they don't need to be returned
     # All at once - this saves time upfront.
