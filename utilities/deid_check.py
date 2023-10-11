@@ -25,10 +25,11 @@ def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, file_ty
                 file_deid_method = file_info['DeidentificationMethod']
             identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in file_info]
             for key in identifier_keys:
-                if len(file_info[key]) > 0:
+                value_string = str(file_info[key])
+                if len(value_string) > 0:
                     file_has_patient_identifiers = True
                     # Check if file_info[key] contains alphanumeric characters
-                    if any(char.isalnum() for char in file_info[key]):
+                    if any(char.isalnum() for char in value_string):
                         file_patient_identifiers_populated = True
         else:
             # This happens if the file has not had any classifiers run on it
