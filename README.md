@@ -1,20 +1,12 @@
-# fwCustomDeidentification
+# fwCustomDeidentification - archive only
 
-**Update 2023-02-06**: The profiles here are applied automatically for most users uploading
-DICOM data. The [site
-profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
-is now applied automatically on import with `fw ingest dicom`, or via the web interface.
+**Update 2023-10-23**: This repository will no longer be updated, please see [the new
+repository](https://github.com/brainsciencecenter/flywheel-deidentification).
+Customization of the Penn site profile by users is no longer allowed, contact the site
+admin if you need this capability.
 
-Attempting to de-identify the data by any other means will raise an error. Ingest dicom
-data with the `fw ingest dicom` command, without `--de-identify` or any profiles in config
-file.
 
-**Do not use older versions of the code with `fw import dicom` to import data to
-Flywheel**.
-
-If you require a different de-identification profile than the site profile, please contact
-the site admin Gaylord Holder to discuss options.
-
+# Old README contents
 
 ## How the de-identification works
 
@@ -125,5 +117,5 @@ Archive Wiki](https://wiki.cancerimagingarchive.net/display/Public/Submission+an
 [Report of the Medical Image De-Identification (MIDI) Task Group -- Best
 Practices and Recommendations](http://arxiv.org/abs/2303.10473). Preprint
 discussing the complex issues surrounding de-identification for public
-data sharing. 
+data sharing.
 
